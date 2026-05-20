@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Daily Finance Brief</title>
+<style>
+:root { color-scheme: light; --primary:#1a1a2e; --accent:#e94560; --gold:#f5a623; --green:#27ae60; --red:#e74c3c; --bg:#f4f5f7; --card:#fff; --text:#2c3e50; --muted:#7f8c8d; --border:#e2e4e8; }
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Georgia',serif;background:var(--bg);color:var(--text);line-height:1.6;font-size:15px;}
+a{color:inherit;text-decoration:none;}
+a:hover{color:var(--accent);}
+
+/* HEADER */
+.hdr{background:var(--primary);color:#fff;padding:18px 24px 14px;}
+.hdr-top{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid rgba(255,255,255,.15);padding-bottom:12px;margin-bottom:12px;}
+.brand{font-size:26px;font-weight:700;letter-spacing:-.5px;}
+.brand em{color:var(--accent);font-style:normal;}
+.brand-sub{font-family:sans-serif;font-size:11px;color:rgba(255,255,255,.5);margin-top:2px;}
+.hdr-meta{text-align:right;font-family:sans-serif;font-size:12px;color:rgba(255,255,255,.6);}
+.hdr-meta strong{display:block;font-size:14px;color:#fff;margin-bottom:2px;}
+.ticker-row{display:flex;flex-wrap:wrap;gap:18px;font-family:'Courier New',monospace;font-size:12px;}
+.tk{display:flex;gap:6px;}
+.tk-n{color:rgba(255,255,255,.5);}
+.tk-v{font-weight:700;}
+.up{color:#2ecc71;} .dn{color:#ff6b6b;}
+
+/* PERSONALIZATION */
+.pbar{background:#fff8e1;border-bottom:2px solid #ffe082;padding:8px 24px;font-family:sans-serif;font-size:12px;color:#5d4037;display:none;align-items:center;gap:8px;flex-wrap:wrap;}
+.itag{background:#fff3cd;border:1px solid #ffe082;border-radius:10px;padding:2px 9px;font-size:11px;color:#856404;font-weight:600;}
+.pclear{margin-left:auto;cursor:pointer;color:#856404;font-size:11px;text-decoration:underline;}
+
+/* NAV */
+.nav{background:#fff;border-bottom:2px solid var(--border);padding:0 20px;display:flex;gap:2px;overflow-x:auto;position:sticky;top:0;z-index:100;box-shadow:0 2px 6px rgba(0,0,0,.06);}
+.ntab{padding:13px 16px;font-family:sans-serif;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:.2s;letter-spacing:.3px;}
+.ntab:hover{color:var(--text);}
+.ntab.on{color:var(--accent);border-bottom-color:var(--accent);}
+
+/* MAIN */
+.wrap{max-width:860px;margin:0 auto;padding:22px 16px;}
+.sec{display:none;}
+.sec.on{display:block;}
+
+/* SECTION HEADER */
+.sh{display:flex;align-items:center;gap:10px;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid var(--border);}
+.sh-icon{font-size:22px;}
+.sh-title{font-size:20px;font-weight:700;color:var(--primary);}
+.sh-count{font-family:sans-serif;font-size:11px;background:var(--bg);padding:2px 8px;border-radius:10px;color:var(--muted);}
+
+/* STATS ROW */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:22px;}
+.stat{background:#fff;border-radius:8px;border:1px solid var(--border);padding:14px;text-align:center;}
+.stat-v{font-size:20px;font-weight:700;color:var(--primary);}
+.stat-l{font-family:sans-serif;font-size:10px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.5px;}
+
+/* CARD */
+.card{background:#fff;border-radius:8px;border:1px solid var(--border);padding:18px;margin-bottom:14px;transition:.2s;position:relative;}
+.card:hover{box-shadow:0 4px 14px rgba(0,0,0,.07);transform:translateY(-1px);}
+.card.pi{border-left:4px solid var(--gold);}
+.cmeta{display:flex;align-items:center;gap:7px;margin-bottom:9px;flex-wrap:wrap;}
+.src{font-family:sans-serif;font-size:10px;font-weight:700;letter-spacing:.4px;padding:2px 7px;border-radius:3px;background:#f0f0f0;color:#555;}
+.crit{font-family:sans-serif;font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;}
+.crit.cr{background:#fde8e8;color:#c0392b;}
+.crit.hi{background:#fff3cd;color:#856404;}
+.crit.md{background:#d4edda;color:#155724;}
+.ctime{font-family:sans-serif;font-size:10px;color:var(--muted);}
+.ctitle{font-size:16px;font-weight:700;line-height:1.4;margin-bottom:8px;color:var(--primary);}
+.cbody{font-size:13.5px;color:#4a4a4a;line-height:1.75;margin-bottom:13px;}
+.cfooter{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.tags{display:flex;gap:5px;flex-wrap:wrap;}
+.tag{font-family:sans-serif;font-size:10px;background:#f0f4ff;color:#3557c0;padding:2px 7px;border-radius:10px;}
+.lbtn{background:none;border:1px solid var(--border);border-radius:16px;padding:4px 12px;font-family:sans-serif;font-size:11px;cursor:pointer;color:var(--muted);display:flex;align-items:center;gap:4px;white-space:nowrap;transition:.2s;}
+.lbtn:hover{border-color:#e74c3c;color:#e74c3c;}
+.lbtn.liked{background:#fde8e8;border-color:#e74c3c;color:#e74c3c;}
+
+/* SUB TABS */
+.stabs{display:flex;gap:7px;margin-bottom:18px;}
+.stab{padding:6px 14px;border-radius:16px;font-family:sans-serif;font-size:11px;font-weight:700;cursor:pointer;border:1px solid var(--border);color:var(--muted);transition:.2s;}
+.stab.on{background:var(--primary);color:#fff;border-color:var(--primary);}
+.ssec{display:none;}
+.ssec.on{display:block;}
+
+/* DOTS */
+.dots{background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:12px;padding:26px;margin-top:28px;color:#fff;}
+.dh{display:flex;align-items:center;gap:10px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.12);}
+.dt{font-size:18px;font-weight:700;}
+.ds{font-family:sans-serif;font-size:12px;color:rgba(255,255,255,.55);}
+.dchain{display:flex;flex-direction:column;}
+.ditem{display:flex;gap:14px;}
+.dline{display:flex;flex-direction:column;align-items:center;flex-shrink:0;}
+.dcircle{width:11px;height:11px;border-radius:50%;background:var(--accent);margin-top:5px;flex-shrink:0;}
+.dconn{width:2px;flex:1;background:rgba(255,255,255,.18);min-height:20px;}
+.dcontent{padding-bottom:18px;}
+.dcause{font-size:12px;font-weight:700;color:var(--accent);font-family:sans-serif;margin-bottom:3px;}
+.deff{font-size:13.5px;color:rgba(255,255,255,.88);line-height:1.65;}
+.dimpacts{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;}
+.imp{font-family:sans-serif;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700;}
+.imp.inf{background:#fde8e8;color:#c0392b;}
+.imp.mkt{background:#d4edda;color:#155724;}
+.imp.eco{background:#cce5ff;color:#004085;}
+.imp.day{background:#fff3cd;color:#856404;}
+
+@media(max-width:600px){
+  .stats{grid-template-columns:repeat(2,1fr);}
+  .brand{font-size:20px;}
+  .ticker-row{gap:10px;}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-top">
+    <div>
+      <div class="brand">The Daily Finance <em>Brief</em></div>
+      <div class="brand-sub">YOUR PERSONALIZED FINANCE INTELLIGENCE · 9 PM IST EDITION</div>
+    </div>
+    <div class="hdr-meta">
+      <strong id="hdr-date">Wednesday, 20 May 2026</strong>
+      <div>Edition #1 &nbsp;|&nbsp; 9:00 PM IST</div>
+      <div style="margin-top:4px;color:rgba(255,255,255,.4);">❤️ Like stories to personalize</div>
+    </div>
+  </div>
+  <div class="ticker-row">
+    <div class="tk"><span class="tk-n">NIFTY</span><span class="tk-v dn">23,885 ▼0.98%</span></div>
+    <div class="tk"><span class="tk-n">SENSEX</span><span class="tk-v dn">75,124 ▼0.20%</span></div>
+    <div class="tk"><span class="tk-n">S&amp;P 500</span><span class="tk-v dn">7,353 ▼0.67%</span></div>
+    <div class="tk"><span class="tk-n">NASDAQ</span><span class="tk-v dn">25,870 ▼0.84%</span></div>
+    <div class="tk"><span class="tk-n">BTC</span><span class="tk-v up">$77,428 ▲0.87%</span></div>
+    <div class="tk"><span class="tk-n">ETH</span><span class="tk-v up">$2,128 ▲0.88%</span></div>
+    <div class="tk"><span class="tk-n">INR/USD</span><span class="tk-v dn">₹95.40 ▼ REC LOW</span></div>
+    <div class="tk"><span class="tk-n">BRENT</span><span class="tk-v dn">$106/bbl</span></div>
+  </div>
+</div>
+
+<!-- PERSONALIZATION BAR -->
+<div class="pbar" id="pbar">
+  ⭐ Your interests:&nbsp;<span id="itags"></span>
+  <span class="pclear" onclick="clearPrefs()">Clear preferences</span>
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <div class="ntab on" onclick="showSec('overview',this)">📊 Overview</div>
+  <div class="ntab" onclick="showSec('companies',this)">🏭 Companies</div>
+  <div class="ntab" onclick="showSec('economy',this)">🇮🇳 Indian Economy</div>
+  <div class="ntab" onclick="showSec('markets',this)">📈 Stock Markets</div>
+  <div class="ntab" onclick="showSec('sectors',this)">🏗️ Sectors</div>
+  <div class="ntab" onclick="showSec('world',this)">🌍 World &amp; Geo</div>
+  <div class="ntab" onclick="showSec('insights',this)">💡 Insights</div>
+</div>
+
+<div class="wrap">
+
+<!-- ═══════════════════════════════ OVERVIEW ═══════════════════════════════ -->
+<div class="sec on" id="sec-overview">
+  <div class="stats">
+    <div class="stat"><div class="stat-v">18</div><div class="stat-l">Stories Today</div></div>
+    <div class="stat"><div class="stat-v" style="color:#c0392b">3</div><div class="stat-l">Critical Events</div></div>
+    <div class="stat"><div class="stat-v dn">₹95.40</div><div class="stat-l">INR/USD Record Low</div></div>
+    <div class="stat"><div class="stat-v" style="color:#856404">$106</div><div class="stat-l">Brent Crude/bbl</div></div>
+  </div>
+
+  <div class="sh"><span class="sh-icon">🔥</span><span class="sh-title">Top Stories Today</span><span class="sh-count">Critical events shaping markets</span></div>
+
+  <div class="card" id="card-ov1">
+    <div class="cmeta"><span class="src">NBC NEWS / CNBC</span><span class="crit cr">🔴 CRITICAL</span><span class="ctime">Geopolitics</span></div>
+    <div class="ctitle"><a href="https://www.nbcnews.com/business/business-news/oil-markets-gas-prices-450-us-iran-near-deal-end-war-hormuz-rcna343819" target="_blank">US-Iran War: Peace Deal Hopes Emerge — Trump Cancels Attack, Senate Advances Resolution</a></div>
+    <div class="cbody">President Trump cancelled planned military strikes on Iran and told lawmakers the war would end "very quickly." The Senate is advancing a joint ceasefire resolution. This single development is the most market-moving event of the day. The US-Iran war — triggered by a joint US-Israel strike in February 2026 that killed Iran's Supreme Leader — caused the largest oil supply disruption in the history of global markets. Brent crude surged 55%+ and peaked at $120/barrel. A peace deal would trigger a sharp oil price crash and a sweeping global market relief rally.</div>
+    <div class="cfooter"><div class="tags"><span class="tag">Iran War</span><span class="tag">Oil Markets</span><span class="tag">Geopolitics</span></div><button class="lbtn" onclick="like('ov1',['Iran War','Oil Markets','Geopolitics'],this)">♡ Like</button></div>
+  </div>
+
+  <div class="card" id="card-ov2">
+    <div class="cmeta"><span class="src">RBI / BUSINESS STANDARD</span><span class="crit cr">🔴 CRITICAL</span><span class="ctime">Monetary Policy</span></div>
+    <div class="ctitle"><a href="https://www.business-standard.com/topic/rbi" target="_blank">RBI Holds Repo Rate at 5.25% — Neutral Stance Maintained as Rupee Hits Record Low</a></div>
+    <div class="cbody">The RBI's Monetary Policy Committee kept the benchmark repo rate unchanged at 5.25% for the second consecutive meeting, maintaining a "neutral" stance. The decision comes amid a rupee at a record low of ₹95.40/USD, elevated crude oil at $106/barrel, and rising bond yields. The RBI is caught in a classic bind: cutting rates would weaken the rupee further (making oil imports even more expensive), while hiking would choke economic growth. Your home loan EMIs and auto loan rates stay unchanged for now.</div>
+    <div class="cfooter"><div class="tags"><span class="tag">RBI</span><span class="tag">Repo Rate</span><span class="tag">EMI</span></div><button class="lbtn" onclick="like('ov2',['RBI','Repo Rate','Monetary Policy'],this)">♡ Like</button></div>
+  </div>
+
+  <div class="card" id="card-ov3">
+    <div class="cmeta"><span class="src">RBI / BANKING FINANCE</span><span class="crit cr">🔴 CRITICAL</span><span class="ctime">Banking / FDI</span></div>
+    <div class="ctitle"><a href="https://www.bankingfinance.in/rbi-news-for-may-2026.html" target="_blank">Landmark Deal: RBI Approves Emirates NBD to Acquire 74% of RBL Bank for $3 Billion</a></div>
+    <div class="cbody">In the largest-ever foreign investment in an Indian bank, the RBI has approved UAE-based Emirates NBD to acquire a 74% controlling stake in RBL Bank for approximately $3 billion. Post-acquisition, RBL Bank will be governed under foreign bank subsidiary norms, though the RBI relaxed certain governance requirements. This signals India's increasing openness to foreign capital in its banking sector and deepens the India-UAE financial relationship. It could spark similar deals in the mid-size banking space.</div>
+    <div class="cfooter"><div class="tags"><span class="tag">Banking</span><span class="tag">RBL Bank</span><span class="tag">FDI</span><span class="tag">UAE</span></div><button class="lbtn" onclick="like('ov3',['Banking','RBL Bank','FDI'],this)">♡ Like</button></div>
+  </div>
+
+  <!-- CONNECTING THE DOTS -->
+  <div class="dots">
+    <div class="dh"><span style="font-size:22px">🔗</span><div><div class="dt">Connecting the Dots</div><div class="ds">How today's events link together &amp; impact your daily life</div></div></div>
+    <div class="dchain">
+
+      <div class="ditem">
+        <div class="dline"><div class="dcircle"></div><div class="dconn"></div></div>
+        <div class="dcontent">
+          <div class="dcause">① US-Iran Peace Hopes →</div>
+          <div class="deff">If a ceasefire materialises, the Strait of Hormuz reopens, and crude oil could crash from $106 to sub-$80. This is the single most consequential pending event in global markets right now — every other story today is a downstream effect of this conflict.</div>
+          <div class="dimpacts"><span class="imp inf">Inflation ↓</span><span class="imp mkt">Global Rally</span><span class="imp day">Petrol cheaper</span></div>
+        </div>
+      </div>
+
+      <div class="ditem">
+        <div class="dline"><div class="dcircle"></div><div class="dconn"></div></div>
+        <div class="dcontent">
+          <div class="dcause">② Oil Drop → Rupee Recovers →</div>
+          <div class="deff">India imports ~85% of its oil. Lower crude = smaller trade deficit = less dollar demand = rupee strengthens from its record low of ₹95.40. FPIs who pulled $21.5B out of India in 2026 may reverse course and bring capital back into Indian equities and bonds.</div>
+          <div class="dimpacts"><span class="imp eco">Trade deficit improves</span><span class="imp mkt">FPI inflows return</span><span class="imp day">Import costs fall</span></div>
+        </div>
+      </div>
+
+      <div class="ditem">
+        <div class="dline"><div class="dcircle"></div><div class="dconn"></div></div>
+        <div class="dcontent">
+          <div class="dcause">③ Stronger Rupee → IT Rally Reverses →</div>
+          <div class="deff">Today's IT surge (Infosys +4–8%, TCS +1.9%, HCL +2.7%) is a "weak rupee trade" — IT earns in USD but pays costs in INR, so depreciation boosts rupee profits. If rupee strengthens on peace news, this tailwind flips to a headwind. Investors holding IT stocks should watch the INR/USD closely.</div>
+          <div class="dimpacts"><span class="imp mkt">IT stocks risk reversal</span></div>
+        </div>
+      </div>
+
+      <div class="ditem">
+        <div class="dline"><div class="dcircle"></div><div class="dconn"></div></div>
+        <div class="dcontent">
+          <div class="dcause">④ US Treasury Yields at 19-Year High → FPI Exodus →</div>
+          <div class="deff">The US 30-year yield at 5.19% means investors get near risk-free returns in the world's safest asset. This pulls money out of emerging markets like India — explaining the record $21.5B FPI outflows this year. The RBI cannot cut rates (would worsen rupee weakness), keeping home loan and business loan rates elevated and slowing growth momentum.</div>
+          <div class="dimpacts"><span class="imp day">Home loans stay expensive</span><span class="imp eco">Growth slows</span><span class="imp inf">Bonds unattractive</span></div>
+        </div>
+      </div>
+
+      <div class="ditem">
+        <div class="dline"><div class="dcircle"></div></div>
+        <div class="dcontent">
+          <div class="dcause">⑤ Emirates NBD + RBL Bank →</div>
+          <div class="deff">Despite all the market turbulence, the $3B UAE acquisition of RBL Bank signals that long-term strategic investors see India's banking sector as undervalued and well-positioned for growth. India-UAE financial ties are deepening, which may also mean more Gulf capital flowing into Indian infrastructure and sovereign bonds.</div>
+          <div class="dimpacts"><span class="imp eco">India-UAE ties deepen</span><span class="imp mkt">Mid-bank sector re-rates</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ COMPANIES ═══════════════════════════════ -->
+<div class="sec" id="sec-companies">
+  <div class="sh"><span class="sh-icon">🏭</span><span class="sh-title">Company-Specific News</span><span class="sh-count">6 stories</span></div>
+
+  <div class="card" id="card-co1">
+    <div class="cmeta"><span class="src">NSE / KOTAK NEO</span><span class="crit hi">🟡 HIGH</span><span class="ctime">Q4 Results</span></div>
+    <div class="ctitle"><a href="https://www.kotakneo.com/news/market-news/stock-market-update-sensex-nifty-18may-2026/" target="_blank">PI Industries Crashes 7% After Q4 Revenue Falls 12% — Agrochemical Demand Slump</a></div>
+    <div class="cbody">PI Industries reported a 12% decline in March-quarter revenue, sending its stock down 7%. The slump reflects weak domestic agrochemical demand and global crop protection chemical price pressures. Export order pipelines are under scrutiny, and analysts are watching whether a monsoon-driven recovery in farmer incomes in Q1 FY27 will revive demand. This is a stock-specific event with no broader market connection.</div>
+    <div class="cfooter"><div class="tags"><span class="tag">PI Industries</span><span class="tag">Agrochemicals</span><span class="tag">Q4 FY26</span></div><button class="lbtn" onclick="like('co1',['PI Industries','Agrochemicals','Q4 Results'],this)">♡ Like</button></div>
+  </div>
+
+  <div class="card" id="card-co2">
+    <div class="cmeta"><span class="src">WHALESBOOK / NSE</span><span class="crit hi">🟡 HIGH</span><span class="ctime">Q4 Results</span></div>
+    <div class="ctitle"><a href="https://www.whalesbook.com/news/English/stock-investment-ideas/May-16-Indian-Companies-Report-Mixed-Q4-Results-VI-Struggles/6a07d23ee125a601ebe29d49" target="_blank">ZEE Entertainment Falls 5.5% on Quarterly Loss — TV Ad Revenue Remains Weak</a></div>
+    <div class="cbody">ZEE Entertainment posted a net quarterly loss, sending shares down 5.5%. TV advertising revenues remain under pressure as audiences migrate to streaming platforms. The failed Sony merger continues to cast a strategic shadow. ZEE's path to recovery will depend on whether it can monetise its content library and streaming platform ZEE5 effectively — a challenge given Netflix and JioCinema's dominance.</div>
+    <div class="cfooter"><div class="tags"><span class="tag">ZEE Entertainment</span><span class="tag">Media</span><span class="tag">Streaming</span></div><button class="lbtn" onclick="like('co2',['ZEE Entertainment','Media','Q4 Results'],this)">♡ Like</button></div>
+  </div>
+
+  <div class="card" id="card-co3">
+    <div class="cmeta"><span class="src">BUSINESS TODAY</span><span class="crit md">🟢 MEDIUM</span><span class="ctime">Auto Sales</span></div>
+    <div class="ctitle"><a href="https://www.businesstoday.in/auto" target="_blank">Maruti Suzuki March Sales Up 10.27% YoY — Exports Surge a Remarkable 42.68%</a></div>
+    <div class="cbody">India's largest carmaker Maruti Suzuki sold 1,66,219 units in March 2026, up 10.27% year-on-year. The headline-stealer is export growth of 42.68%, reflecting strong global demand for Indian-manufactured vehicles. Domestic resilience amid high fuel costs suggests urban consumer confidence remains intact. SUV and CNG variants are driving domestic volume growth.</div>
+    <div class="cfooter"><div class="tags"><span class="tag">Maruti Suzuki</span><span class="tag">Auto</span><span class="tag">Exports</span></div><button class="lbtn" onclick="like('co3',['Maruti Suzuki','Auto','Exports'],this)">♡ Like</button></div>
+  </div>
+
+  <div class="card" id="card-co4">
+    <div class="cmeta"><span class="src">BUSINESS TODAY</span><span class="crit md">🟢 MEDIUM</span><span class="ctime">Auto Sales</span></div>
+    <div class="ctitle"><a href="https://www.businesstoday.in/auto" target="_blank">Hero MotoCorp Dispatches 5.98 Lakh Units in March 2026, Up 8.9% YoY — Rural Recovery Plays Out</a></div>
+    <div class="cbody">Two-wheeler giant Hero MotoCorp dispatched 598,198 units in March 2026, an 8.9% year-on-year increase. This is a strong signal that rural demand — Hero's core market — is recovering, aided by expectations of a normal monsoon and government rural spending. The company's premium 125cc+ portfolio is also gaining share in urban segments.</div>
+    <div class="cfooter"><div class="tags"><span class="tag">Hero MotoCorp</span><span class="tag">Two Wheelers</span><span class="tag">Rural India</span></div><button class="lbtn" onclick="like('co4',['Hero MotoCorp','Two Wheelers','Rural India'],this)">♡ Like</button></div>
+  </div>
+
+  <div class="card" id="card-co5">
+    <div class="cmeta"><span class="src">BUSINESS STANDARD</span><span class="crit md">🟢 MEDIUM</span><span class="ctime">Pharma</span></div>
+    <div class="ctitle"><a href="https://www.business-standard.com/companies" target="_blank">Glenmark Pharma Goes Direct in US — Takes Over Ryaltris Nasal Spray Distribution from April 2026</a></div>
+    <div class="cbody">Glenmark Pharmaceuticals has moved to direct sales and distribution of its allergy nasal spray Ryaltris in the United States from April 2026, cutting out the distributor to gain margin control. Direct distribution is typically margin-accretive and signals confidence in their US commercial capabilities. A key product gaining US market traction is positive for Glenmark's long-term US revenue story.</div>
+    <div class="cfooter"><div class="tags"><span class="tag">Glenmark</span><span class="tag">Pharma</span><span class="tag">US Market</span></div><button class="lbtn" onclick="like('co5',['Glenmark','Pharma','US Market'],this)">♡ Like</button></div>
+  </div>
+
+  <div class="card" id="card-co6">
+    <div class="cmeta"><span class="src">BUSINESS STANDARD</span><span class="crit md">🟢 MEDIUM</span><span class="ctime">Banking</span></div>
+    <div class="ctitle"><a href="https://www.business-standard.com/companies" target="_blank">YES Bank Appoints S Anantharaman as CRO — Governance Strengthening Continues</a></div>
+    <div class="cbody">YES Bank has brought on S Anantharaman as its new Chief Risk Officer, continuing its post-2020 rescue governance strengthening journey. In an environment where the RBI is tightening scrutiny on unsecured lending and bank risk management, a strong CRO appointment is a meaningful positive signal for an institution still rebuilding market trust.</div>
+    <div class="cfooter"><div class="tags"><span class="tag">YES Bank</span><span class="tag">Banking</span><span class="tag">Governance</span></div><button class="lbtn" onclick="like('co6',['YES Bank','Banking','Governance'],this)">♡ Like</button></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ INDIAN ECONOMY ═══════════════════════════════ -->
+<div class="sec" id="sec-economy">
+  <div class="sh"><span class="sh-icon">🇮🇳</span><span class="sh-title">Indian Economy News</span><span class="sh-count">5 stories</span></div>
+
+  <div class="card" id="card-ie1">
+    <div class="cmeta"><span class="src">RBI / BANKING FINANCE</span><span class="crit cr">🔴 CRITICAL</span><span class="ctime">Monetary Policy</span></div>
+    <div class="ctitle"><a href="https://www.bankingfinance.in/rbi-news-for-may-2026.html" target="_blank">RBI Holds Repo Rate at 5.25% — Neutral Stance, Your EMIs Stay Unchanged</a></div>
+    <div class="cbody">The RBI's MPC kept the benchmark repo rate at 5.25% for the second consecutive meeting. Governor signalled "neutral" stance — neither committed to cut nor hike. Drivers of the hold: rupee at record lows (cutting would worsen this), crude at $106/barrel (imported inflation risk), and US treasury yields at 19-year highs (rate differential pressure). What this means for you: home loan and car loan EMIs remain at current levels. Businesses will not see relief in borrowing costs soon.</div>
+    <div class="cfooter"><div class="tags"><span class="tag">RBI</span><span class="tag">Repo Rate</span><span class="tag">EMI</span><span class="tag">Loans</span></div><button class="lbtn" onclick="like('ie1',['RBI','Repo Rate','EMI','Monetary Policy'],this)">♡ Like</button></div>
+  </div>
+
+  <div class="card" id="card-ie2">
+    <div class="cmeta"><span class="src">TRADING ECONOMICS / WHALESBOOK</span><span class="crit cr">🔴 CRITICAL</span><span class="ctime">Currency</span></div>
+    <div class="ctitle"><a href="https://www.whalesbook.com/news/English/economy/India-Stocks-Plunge-on-Oil-Surge-Rupees-Record-Low/69f99315d87e3288bea889ec" target="_blank">Rupee at All-Time Low of ₹95.40/USD — FPI Outflows Hit Record $21.52 Billion in 2026</a></div>
+    <div class="cbody">The Indian rupee has crashed to a historic low of ₹95.40 per dollar, battered by soaring crude oil import bills and a record exodus of foreign portfolio investors. FPIs have pulled out $21.52 billion from Indian markets in 2026 — surpassing all previous annual records. The weak rupee makes everything imported costlier: smartphones, electronics, edible oils, machinery. It also increases India's petroleum subsidy burden and widens the fiscal deficit. The RBI is intervening to limit sharp depreciation but lacks the firepower to fully arrest the slide given global pressures.</div>
+    <div class="cfooter"><div class="tags"><span class="tag">Rupee</span><span class="tag">INR/USD</span><span class="tag">FPI Outflows</span><span class="tag">Inflation</span></div><button class="lbtn" onclick="like('ie2',['Rupee','INR/USD','FPI Outflows','Inflation'],this)">♡ Like</button></div>
+  </div>
+
+  <div class="card" id="card-ie3">
+    <div class="cmeta"><span class="src">RBI / BANKING FINANCE</span><span class="crit cr">🔴 CRITICAL</span><span class="ctime">Banking / FDI</span></div>
+    <div class="ctitle"><a href="https://www.bankingfinance.in/rbi-news-for-may-2026.html" target="_blank">Emirates NBD Gets RBI Green Light for $3B RBL Bank Acquisition — India's Largest-Ever Foreign Bank FDI</a></div>
+    <div class="cbody">UAE's Emirates NBD — one of the Gulf's largest banks — has received RBI approval to acquire 74% of RBL Bank for ~$3 billion, marking the single largest foreign direct investment in India's banking sector ever. Post-deal, RBL Bank will be classified as a foreign bank subsidiary. The RBI has relaxed some governance norms to facilitate the deal. This deepens the India-UAE CEPA trade agreement's financial chapter and may attract more Gulf sovereign capital into Indian banking and infrastructure.</div>
+    <div class="cfooter"><div class="tags"><span class="tag">Emirates NBD</span><span class="tag">RBL Bank</span><span class="tag">FDI</span><span class="tag">India-UAE</span></div><button class="lbtn" onclick="like('ie3',['FDI','RBL Bank','Emirates NBD','Banking'],this)">♡ Like</button></div>
+  </div>
+
+  <div class="card" id="card-ie4">
+    <div class="cmeta"><span class="src">RBI PRESS RELEASE</span><span class="crit md">🟢 MEDIUM</span><span class="ctime">Trade</span></div>
+    <div class="ctitle"><a href="https://www.bankingfinance.in/rbi-news-for-may-2026.html" target="_blank">RBI Extends 450-Day Export Credit Window Till June 30, 2026 — Exporters Get Breathing Room</a></div>
+    <div class="cbody">The RBI has extended its enhanced export credit facility — allowing pre- and post-shipment finance for up to 450 days (vs. the standard period) — until June 30, 2026. First introduced in November 2025 to cushion exporters from West Asia supply chain disruptions, the extension gives Indian exporters more flexibility to manage working capital as global shipping delays and payment cycles lengthen due to the Iran war.</div>
+    <div class="cfooter"><div class="tags"><span class="tag">Exports</span><span class="tag">RBI</span><span class="tag">Trade Finance</span></div><button class="lbtn" onclick="like('ie4',['Exports','RBI','Trade Finance'],this)">♡ Like</button></div>
+  </div>
+
+  <div class="card" id="card-ie5">
+    <div class="cmeta"><span class="src">RBI / PIB</span><span class="crit md">🟢 MEDIUM</span><span class="ctime">Digital Finance</span></div>
+    <div class="ctitle"><a href="https://www.pib.gov.in/PressReleasePage.aspx?PRID=2195990&reg=3&lang=1" target="_blank">India's e-Rupee Crosses 150 Million Transactions — CBDC Gains Momentum</a></div>
+    <div class="cbody">India's Central Bank Digital Currency (CBDC / e-Rupee) has crossed 150 million transactions with total value exceeding ₹34,000 crore. The RBI also removed prior-approval requirements for non-bank entities facilitating outward remittances through banks — a liberalisation that opens the remittance market to more fintech competition and could lower costs for the Indian diaspora sending money home.</div>
+    <div class="cfooter"><div class="tags"><span class="tag">CBDC</span><span class="tag">e-Rupee</span><span class="tag">Fintech</span><span class="tag">Remittance</span></div><button class="lbtn" onclick="like('ie5',['CBDC','e-Rupee','Fintech'],this)">♡ Like</button></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ MARKETS ═══════════════════════════════ -->
+<div class="sec" id="sec-markets">
+  <div class="sh"><span class="sh-icon">📈</span><span class="sh-title">Stock Market News</span><span class="sh-count">NSE/BSE · US · Crypto</span></div>
+  <div class="stabs">
+    <div class="stab on" onclick="showSub('nse',this)">🇮🇳 NSE / BSE</div>
+    <div class="stab" onclick="showSub('us',this)">🇺🇸 US Markets</div>
+    <div class="stab" onclick="showSub('crypto',this)">₿ Crypto</div>
+  </div>
+
+  <div class="ssec on" id="sub-nse">
+    <div class="card" id="card-mk1">
+      <div class="cmeta"><span class="src">NSE / KOTAK NEO</span><span class="crit hi">🟡 HIGH</span><span class="ctime">Market Wrap</span></div>
+      <div class="ctitle"><a href="https://www.kotakneo.com/news/market-news/stock-market-update-sensex-nifty-18may-2026/" target="_blank">Sensex Down 0.2% at 75,124 — Volatile Session as Oil Fears Battle Iran Peace Hopes</a></div>
+      <div class="cbody">The BSE Sensex closed down ~0.2% at 75,124 after a whipsaw session. The Nifty 50 fell 233 points to 23,885. Markets swung between hope (Iran ceasefire signals) and fear (crude at $106, rupee at record lows). IT stocks saved the day for bulls, but banking and consumption heavyweights dragged. Market breadth was negative — more stocks fell than rose across both exchanges.</div>
+      <div class="cfooter"><div class="tags"><span class="tag">Sensex</span><span class="tag">Nifty 50</span><span class="tag">Market Wrap</span></div><button class="lbtn" onclick="like('mk1',['Sensex','Nifty 50','Market Wrap'],this)">♡ Like</button></div>
+    </div>
+    <div class="card" id="card-mk2">
+      <div class="cmeta"><span class="src">TRADING ECONOMICS / NSE</span><span class="crit hi">🟡 HIGH</span><span class="ctime">Top Gainers</span></div>
+      <div class="ctitle"><a href="https://tradingeconomics.com/india/stock-market" target="_blank">IT Stocks Surge — Infosys +4–8%, HCL Tech +2.7%, TCS +1.9% on Weak Rupee Tailwind</a></div>
+      <div class="cbody">IT stocks led the market's gainers as investors positioned for the currency benefit: IT companies earn revenues in USD but pay costs in rupees, so a weaker rupee directly boosts their rupee-denominated profits and EPS. Infosys surged 4–8%, followed by HCL Tech (+2.7%), Tech Mahindra (+2.6%), and TCS (+1.9%). Nifty IT was the clear sectoral outperformer. Caution: this trade is directly tied to rupee weakness — watch INR/USD as the indicator for this trade's longevity.</div>
+      <div class="cfooter"><div class="tags"><span class="tag">IT Stocks</span><span class="tag">Infosys</span><span class="tag">TCS</span><span class="tag">Nifty IT</span></div><button class="lbtn" onclick="like('mk2',['IT Stocks','Infosys','TCS','Nifty IT'],this)">♡ Like</button></div>
+    </div>
+    <div class="card" id="card-mk3">
+      <div class="cmeta"><span class="src">NSE MARKET DATA</span><span class="crit md">🟢 MEDIUM</span><span class="ctime">Top Losers</span></div>
+      <div class="ctitle"><a href="https://tradingeconomics.com/india/stock-market" target="_blank">Top Losers: Kotak Bank −2.5%, UltraTech −1.7%, Titan −1.6%, Airtel −1.3%, Sun Pharma −1.2%</a></div>
+      <div class="cbody">Banking and consumption names led the decline. Kotak Mahindra Bank fell 2.5% amid continued banking sector NIM compression (now at 3.77%). UltraTech Cement and Titan saw profit-taking after recent run-ups. Bharti Airtel fell on ARPU growth concerns. Sun Pharma declined on cautious sector sentiment. These heavyweights' weakness is what prevented a broader market recovery despite IT strength.</div>
+      <div class="cfooter"><div class="tags"><span class="tag">Kotak Bank</span><span class="tag">Nifty Losers</span><span class="tag">Banking</span></div><button class="lbtn" onclick="like('mk3',['Kotak Bank','Banking','Nifty Losers'],this)">♡ Like</button></div>
+    </div>
+  </div>
+
+  <div class="ssec" id="sub-us">
+    <div class="card" id="card-us1">
+      <div class="cmeta"><span class="src">CNBC / THESTREET</span><span class="crit hi">🟡 HIGH</span><span class="ctime">US Market Wrap</span></div>
+      <div class="ctitle"><a href="https://www.thestreet.com/stock-market-today/stock-market-today-may-19-2026-updates" target="_blank">S&amp;P 500 Falls Third Straight Day — Down 0.67% at 7,353 as Treasury Yields Spike</a></div>
+      <div class="cbody">US markets closed in the red for the third consecutive session, with the S&amp;P 500 at 7,353 (−0.67%), Nasdaq at 25,870 (−0.84%), and Dow Jones down 322 points to 49,363. The root cause: soaring bond yields are making stocks comparatively less attractive. The 30-year Treasury yield briefly topped 5.19% — a 19-year high — while the 10-year climbed to 4.687%. Three straight down days are unusual for a bull market and signal growing macro anxiety.</div>
+      <div class="cfooter"><div class="tags"><span class="tag">S&amp;P 500</span><span class="tag">Nasdaq</span><span class="tag">US Markets</span></div><button class="lbtn" onclick="like('us1',['S&P 500','US Markets','Nasdaq'],this)">♡ Like</button></div>
+    </div>
+    <div class="card" id="card-us2">
+      <div class="cmeta"><span class="src">CNBC MARKETS</span><span class="crit cr">🔴 CRITICAL</span><span class="ctime">Bond Markets</span></div>
+      <div class="ctitle"><a href="https://www.cnbc.com/2026/05/18/stock-market-today-live-updates.html" target="_blank">US 30-Year Treasury Yield Tops 5.19% — Highest in Nearly 19 Years, Threatening Global Equities</a></div>
+      <div class="cbody">The US 30-year Treasury yield briefly exceeded 5.19%, a level not seen since approximately 2007. The 10-year also climbed to 4.687%. Bond markets are pricing in two fears: (1) persistent inflation from the oil shock keeping the Fed on hold or hiking; and (2) fiscal sustainability concerns as wartime US spending expands the deficit. When the global risk-free benchmark rises this sharply, it reprices ALL assets globally — equities, real estate, emerging market bonds, and currencies. This is the gravitational force pulling capital out of India right now.</div>
+      <div class="cfooter"><div class="tags"><span class="tag">US Bonds</span><span class="tag">Treasury Yields</span><span class="tag">Fed Policy</span></div><button class="lbtn" onclick="like('us2',['US Bonds','Treasury Yields','Fed Policy'],this)">♡ Like</button></div>
+    </div>
+    <div class="card" id="card-us3">
+      <div class="cmeta"><span class="src">CNBC EARNINGS</span><span class="crit md">🟢 MEDIUM</span><span class="ctime">Earnings</span></div>
+      <div class="ctitle"><a href="https://www.cnbc.com/2026/05/18/stock-market-today-live-updates.html" target="_blank">Home Depot Beats Q1 Estimates — US Home Improvement Spending Holds Up</a></div>
+      <div class="cbody">Home Depot reported better-than-expected Q1 2026 earnings, a positive read on the US middle-class consumer. Despite high mortgage rates limiting new home purchases, homeowners are investing in renovations. Home Depot is a bellwether for US consumer discretionary spending — the beat suggests the US consumer is not yet capitulating even under the oil price pressure and higher financing costs.</div>
+      <div class="cfooter"><div class="tags"><span class="tag">Home Depot</span><span class="tag">US Consumer</span><span class="tag">Earnings Beat</span></div><button class="lbtn" onclick="like('us3',['Home Depot','US Consumer','Earnings'],this)">♡ Like</button></div>
+    </div>
+  </div>
+
+  <div class="ssec" id="sub-crypto">
+    <div class="card" id="card-cr1">
+      <div class="cmeta"><span class="src">YAHOO FINANCE</span><span class="crit md">🟢 MEDIUM</span><span class="ctime">Crypto Wrap</span></div>
+      <div class="ctitle"><a href="https://finance.yahoo.com/personal-finance/investing/article/bitcoin-and-ethereum-prices-today-wednesday-may-20-2026-opened-lower-but-moving-higher-111622180.html" target="_blank">Bitcoin Bounces to $77,428 — Iran Peace Hopes Lift Crypto After Weak Open</a></div>
+      <div class="cbody">Bitcoin opened Wednesday lower but recovered to $77,428 as Iran ceasefire signals boosted risk appetite. Ethereum followed to $2,128. However, the recovery comes with caution signals: falling futures open interest indicates traders are closing positions and reducing risk rather than aggressively buying. Mixed altcoin performance suggests selective, not broad-based buying. Markets are tentatively green, not convincingly bullish. Bitcoin's ATH remains $126,198 (Oct 2025) — still 38% below those peaks.</div>
+      <div class="cfooter"><div class="tags"><span class="tag">Bitcoin</span><span class="tag">BTC</span><span class="tag">Crypto</span></div><button class="lbtn" onclick="like('cr1',['Bitcoin','Crypto','BTC'],this)">♡ Like</button></div>
+    </div>
+    <div class="card" id="card-cr2">
+      <div class="cmeta"><span class="src">COINDESK</span><span class="crit md">🟢 MEDIUM</span><span class="ctime">Crypto Analysis</span></div>
+      <div class="ctitle"><a href="https://www.coindesk.com/markets/2026/05/12/eth-btc-ratio-falls-to-10-month-low-as-ether-continues-to-underperform-bitcoin" target="_blank">Ethereum vs Bitcoin: ETH/BTC Ratio at 10-Month Low — Institutions Prefer Bitcoin as Hedge</a></div>
+      <div class="cbody">The ETH/BTC ratio — a measure of Ethereum's strength relative to Bitcoin — has fallen to its lowest level in 10 months. Institutional capital continues flowing disproportionately into Bitcoin (seen as "digital gold" and an inflation hedge) while Ethereum faces competition from faster/cheaper Layer-1 chains like Solana and Aptos. Ethereum ($2,128) is 57% below its August 2025 ATH of $4,953, while Bitcoin ($77,428) is 38% below its Oct 2025 ATH. The divergence is widening.</div>
+      <div class="cfooter"><div class="tags"><span class="tag">Ethereum</span><span class="tag">ETH/BTC</span><span class="tag">Institutional Crypto</span></div><button class="lbtn" onclick="like('cr2',['Ethereum','Bitcoin','ETH/BTC'],this)">♡ Like</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ SECTORS ═══════════════════════════════ -->
+<div class="sec" id="sec-sectors">
+  <div class="sh"><span class="sh-icon">🏗️</span><span class="sh-title">Sector Spotlight</span><span class="sh-count">Banking · IT · Auto · Pharma</span></div>
+
+  <div class="card" id="card-sec1">
+    <div class="cmeta"><span class="src">IBEF / BUSINESS STANDARD</span><span class="crit hi">🟡 HIGH</span><span class="ctime">Banking Sector</span></div>
+    <div class="ctitle"><a href="https://www.ibef.org/industry/banking-india" target="_blank">Indian Banking: Net Interest Margins Shrink to 3.77% — Profitability Under Structural Pressure</a></div>
+    <div class="cbody">Net interest margins (NIM) — the spread between what banks earn on loans and pay on deposits — have compressed to 3.77% in Q3 FY26, down from 4.12% a year ago. Rising deposit costs (banks are competing aggressively for deposits) are squeezing margins. Fitch Ratings has flagged moderating sector profitability for 2026. Combined with the Emirates NBD–RBL deal reshaping competitive dynamics and RBI scrutiny on unsecured lending, the banking sector faces a complex operating environment.</div>
+    <div class="cfooter"><div class="tags"><span class="tag">Banking Sector</span><span class="tag">NIM</span><span class="tag">Profitability</span></div><button class="lbtn" onclick="like('sec1',['Banking Sector','NIM','Profitability'],this)">♡ Like</button></div>
+  </div>
+
+  <div class="card" id="card-sec2">
+    <div class="cmeta"><span class="src">NSE / TRADING ECONOMICS</span><span class="crit hi">🟡 HIGH</span><span class="ctime">IT Sector</span></div>
+    <div class="ctitle"><a href="https://tradingeconomics.com/india/stock-market" target="_blank">IT Sector: Rupee Weakness is Today's Tailwind — But an Iran Deal Could Flip the Script</a></div>
+    <div class="cbody">The Nifty IT index outperformed all other sectoral indices today, buoyed by the weak rupee boosting dollar-earnings. Indian IT's structural story — AI adoption in enterprise software, cloud migration, and digital transformation deals — remains intact. However, today's rally is largely a currency play. If an Iran peace deal causes the rupee to recover from ₹95.40, expect IT stocks to give back a portion of these gains quickly. Longer-term, the sector benefits from AI integration both as a product seller and an efficiency gainer.</div>
+    <div class="cfooter"><div class="tags"><span class="tag">IT Sector</span><span class="tag">Nifty IT</span><span class="tag">AI</span><span class="tag">Currency Play</span></div><button class="lbtn" onclick="like('sec2',['IT Sector','Nifty IT','AI'],this)">♡ Like</button></div>
+  </div>
+
+  <div class="card" id="card-sec3">
+    <div class="cmeta"><span class="src">BUSINESS TODAY / WHALESBOOK</span><span class="crit md">🟢 MEDIUM</span><span class="ctime">Auto Sector</span></div>
+    <div class="ctitle"><a href="https://www.whalesbook.com/news/English/economy/India-Auto-Sales-Surge-As-Pharma-IT-Energy-Face-New-Risks/69cdd29769ec081354dbd1a3" target="_blank">Auto Sector Defies Oil Headwinds — Strong Sales From Maruti &amp; Hero Signal Consumer Resilience</a></div>
+    <div class="cbody">India's auto sector is outperforming expectations despite fuel price pressures. Maruti (+10.27%) and Hero MotoCorp (+8.9%) both posted strong March volumes. Export momentum is particularly notable — Maruti's 42.68% export surge suggests Indian-made vehicles are gaining global competitive ground. CNG and electric variants are absorbing some demand that petrol models might have lost. Rural recovery (driven by a healthy agricultural cycle) is the key structural driver for two-wheelers.</div>
+    <div class="cfooter"><div class="tags"><span class="tag">Auto Sector</span><span class="tag">EV</span><span class="tag">Rural Recovery</span></div><button class="lbtn" onclick="like('sec3',['Auto Sector','EV','Exports'],this)">♡ Like</button></div>
+  </div>
+
+  <div class="card" id="card-sec4">
+    <div class="cmeta"><span class="src">BUSINESS STANDARD / WHALESBOOK</span><span class="crit md">🟢 MEDIUM</span><span class="ctime">Pharma Sector</span></div>
+    <div class="ctitle"><a href="https://www.whalesbook.com/news/English/economy/India-Auto-Sales-Surge-As-Pharma-IT-Energy-Face-New-Risks/69cdd29769ec081354dbd1a3" target="_blank">Pharma Sector: AI Adoption Accelerating, US Generics Pricing Remains a Structural Risk</a></div>
+    <div class="cbody">Indian pharma is deepening its AI integration — from drug discovery to clinical trial design and US healthcare revenue management. Latent View Analytics' subsidiary invested $3M in a US AI health startup, reflecting this trend. The sector remains exposed to US FDA warning letters, generic drug pricing erosion in the US, and supply chain risks from the Middle East crisis. Glenmark's US direct distribution move is a tactical positive but doesn't change the sector's structural challenges around margins and regulatory risk.</div>
+    <div class="cfooter"><div class="tags"><span class="tag">Pharma Sector</span><span class="tag">AI</span><span class="tag">US FDA</span><span class="tag">Generics</span></div><button class="lbtn" onclick="like('sec4',['Pharma Sector','AI in Pharma','US FDA'],this)">♡ Like</button></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ WORLD ═══════════════════════════════ -->
+<div class="sec" id="sec-world">
+  <div class="sh"><span class="sh-icon">🌍</span><span class="sh-title">World Economy, Markets &amp; Geopolitics</span><span class="sh-count">4 stories</span></div>
+
+  <div class="card" id="card-wo1">
+    <div class="cmeta"><span class="src">NBC NEWS / CNBC</span><span class="crit cr">🔴 CRITICAL</span><span class="ctime">Geopolitics</span></div>
+    <div class="ctitle"><a href="https://www.nbcnews.com/business/business-news/oil-markets-gas-prices-450-us-iran-near-deal-end-war-hormuz-rcna343819" target="_blank">US-Iran War Nears Possible End — Peace Deal Could Trigger Global Oil Price Crash &amp; Market Rally</a></div>
+    <div class="cbody">The US-Iran war, which began February 2026 with a joint US-Israel strike killing Supreme Leader Khamenei, may be reaching a turning point. Trump cancelled planned strikes and said the war would end "very quickly." Iran launched retaliatory missile strikes on US bases across Jordan, UAE, and Qatar in the initial days. The conflict triggered the closure of the Strait of Hormuz — through which 20% of global oil supply flows — causing the IEA to declare the "largest supply disruption in the history of the global oil market." Brent peaked at $120/barrel (+55%). A genuine ceasefire would be among the most significant market-positive events in years.</div>
+    <div class="cfooter"><div class="tags"><span class="tag">Iran War</span><span class="tag">Strait of Hormuz</span><span class="tag">Oil Supply</span><span class="tag">Ceasefire</span></div><button class="lbtn" onclick="like('wo1',['Iran War','Strait of Hormuz','Oil Supply'],this)">♡ Like</button></div>
+  </div>
+
+  <div class="card" id="card-wo2">
+    <div class="cmeta"><span class="src">MINNEAPOLIS FED / IEA</span><span class="crit cr">🔴 CRITICAL</span><span class="ctime">Global Economy</span></div>
+    <div class="ctitle"><a href="https://www.minneapolisfed.org/article/2026/how-long-can-we-look-through-the-iran-war-commodity-shock" target="_blank">Global Stagflation Risk: Iran War Oil Shock Echoes 1970s Energy Crisis — Recession Risk Rising</a></div>
+    <div class="cbody">The Federal Reserve Bank of Minneapolis has drawn explicit parallels between today's oil shock and the 1970s energy crisis. The combination of surging crude, disrupted LNG supply from the Middle East, and global supply chain strains creates a dangerous stagflationary mix: high inflation AND slowing growth simultaneously. Middle Eastern LNG facilities have shut down, refineries suspended, with an estimated $25 billion in infrastructure damage. JP Morgan separately warns of "misplaced euphoria" in markets and continues to flag H2 2026 recession risk for the US and Europe.</div>
+    <div class="cfooter"><div class="tags"><span class="tag">Stagflation</span><span class="tag">Global Economy</span><span class="tag">Recession Risk</span></div><button class="lbtn" onclick="like('wo2',['Stagflation','Global Economy','Recession Risk'],this)">♡ Like</button></div>
+  </div>
+
+  <div class="card" id="card-wo3">
+    <div class="cmeta"><span class="src">JP MORGAN / CNBC</span><span class="crit hi">🟡 HIGH</span><span class="ctime">Market Strategy</span></div>
+    <div class="ctitle"><a href="https://www.jpmorgan.com/insights/global-research/commodities/iran-us-tensions-market-effect" target="_blank">JP Morgan: "Misplaced Euphoria" — Oil Price Damage Already Done Even if Peace Deal Comes</a></div>
+    <div class="cbody">JP Morgan global strategists caution that even if a US-Iran ceasefire materialises, the economic damage already embedded in the global system will take months to unwind. US gas prices are at $4.50/gallon (up $1.16 since war began), jet fuel is up 95% in North America, and global supply chains are repriced for war-level oil. Rebuilding Gulf energy infrastructure will cost $25B and take time. The bank warns investors not to rush into risk-on trades on mere ceasefire headlines and maintains its H2 2026 recession watch.</div>
+    <div class="cfooter"><div class="tags"><span class="tag">JP Morgan</span><span class="tag">Oil Markets</span><span class="tag">Recession</span></div><button class="lbtn" onclick="like('wo3',['JP Morgan','Recession Risk','Markets'],this)">♡ Like</button></div>
+  </div>
+
+  <div class="card" id="card-wo4">
+    <div class="cmeta"><span class="src">TRADING ECONOMICS / CNBC</span><span class="crit cr">🔴 CRITICAL</span><span class="ctime">Bond Markets</span></div>
+    <div class="ctitle"><a href="https://tradingeconomics.com/united-states/interest-rate" target="_blank">US 30-Year Treasury Yield Hits 19-Year High of 5.19% — Global Capital Flees to Dollar Assets</a></div>
+    <div class="cbody">The US 30-year Treasury yield topping 5.19% is a global macro event. Bond markets are signalling dual fears: persistent oil-driven inflation keeping the Fed hawkish, and US fiscal expansion from wartime spending raising deficit concerns. The practical consequence: global capital flows into US Treasuries and away from emerging markets — this is the primary driver of India's rupee weakness and FPI exodus. A 5%+ risk-free return in dollars is the biggest competitor to every asset class in the world right now.</div>
+    <div class="cfooter"><div class="tags"><span class="tag">US Bonds</span><span class="tag">Treasury Yields</span><span class="tag">Dollar Strength</span><span class="tag">EM Outflows</span></div><button class="lbtn" onclick="like('wo4',['US Bonds','Treasury Yields','Dollar Strength'],this)">♡ Like</button></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ INSIGHTS ═══════════════════════════════ -->
+<div class="sec" id="sec-insights">
+  <div class="sh"><span class="sh-icon">💡</span><span class="sh-title">Finance Insights &amp; Explainers</span><span class="sh-count">Know more, invest better</span></div>
+
+  <div class="card" id="card-ins1">
+    <div class="cmeta"><span class="src">EXPLAINED</span><span class="crit md">🟢 EDUCATIONAL</span><span class="ctime">Macro</span></div>
+    <div class="ctitle">📚 Why Rising US Treasury Yields Hurt Your Indian Stock Portfolio</div>
+    <div class="cbody">When US Treasury yields rise (currently at 19-year highs of 5.19%), global investors reallocate from riskier assets — like Indian stocks and EM bonds — to safer US government bonds offering compelling returns. This is the mechanics behind India's $21.5B FPI exodus in 2026. Additionally, higher US yields typically mean a stronger dollar, which weakens the rupee and makes India's oil import bill even more expensive (a double whammy). The "yield spread" — the extra return India must offer vs US Treasuries to attract investors — narrows at high US yields, reducing India's relative appeal. Every basis point rise in the US 10-year affects global capital flows into India.</div>
+    <div class="cfooter"><div class="tags"><span class="tag">Explainer</span><span class="tag">Treasury Yields</span><span class="tag">FPI</span><span class="tag">Rupee</span></div><button class="lbtn" onclick="like('ins1',['Explainer','Treasury Yields','FPI'],this)">♡ Like</button></div>
+  </div>
+
+  <div class="card" id="card-ins2">
+    <div class="cmeta"><span class="src">IEA / GEOGRAPHY</span><span class="crit hi">🟡 HIGH RELEVANCE</span><span class="ctime">Commodities</span></div>
+    <div class="ctitle">📚 The Strait of Hormuz: Why One 33km Waterway Controls Global Fuel Prices</div>
+    <div class="cbody">The Strait of Hormuz is a narrow passage between Iran and Oman — only 33 km wide at its narrowest. Yet ~20–21 million barrels of oil per day pass through it, representing about 20% of global oil supply and 30% of global LNG. Saudi Arabia, UAE, Kuwait, Iraq, and Qatar all depend on it for their oil exports. Iran's unique ability to threaten (or block) this chokepoint is what gives it outsized geopolitical leverage and why the US-Iran war has had such an extreme market impact. India sources a significant portion of its Gulf oil imports through routes exposed to Hormuz disruptions.</div>
+    <div class="cfooter"><div class="tags"><span class="tag">Oil Markets</span><span class="tag">Strait of Hormuz</span><span class="tag">Geography</span></div><button class="lbtn" onclick="like('ins2',['Oil Markets','Hormuz','Commodities'],this)">♡ Like</button></div>
+  </div>
+
+  <div class="card" id="card-ins3">
+    <div class="cmeta"><span class="src">FINSHOTS STYLE</span><span class="crit md">🟢 EDUCATIONAL</span><span class="ctime">Macro Concept</span></div>
+    <div class="ctitle">📚 What Is Stagflation and Why Are Economists Worried About It Right Now?</div>
+    <div class="cbody">Stagflation = Stagnant/slowing growth + High inflation occurring simultaneously. It is an economist's policy nightmare because the standard cures conflict: raising rates to fight inflation also slows growth, while cutting rates to boost growth worsens inflation. Central banks have no clean solution. The 1970s oil shocks created the last major global stagflation episode. Today's combination of a 55%+ surge in crude oil prices, disrupted global supply chains, and a weakening growth outlook is recreating similar conditions. For investors: stagflation tends to be bad for bonds (inflation erodes real returns) and growth stocks (high rates compress valuations), but historically positive for gold, real assets, and commodity producers.</div>
+    <div class="cfooter"><div class="tags"><span class="tag">Stagflation</span><span class="tag">Inflation</span><span class="tag">Investing Concept</span></div><button class="lbtn" onclick="like('ins3',['Stagflation','Investing','Inflation'],this)">♡ Like</button></div>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<div style="text-align:center;font-family:sans-serif;font-size:11px;color:#aaa;padding:20px;border-top:1px solid #e0e0e0;margin-top:8px;line-height:1.8;">
+  <strong style="color:#555">The Daily Finance Brief</strong> · Edition #1 · 20 May 2026 · 9:00 PM IST<br>
+  Sources: NSE, RBI, CNBC, NBC News, JP Morgan, Trading Economics, Yahoo Finance, CoinDesk, Business Standard, Whalesbook, Banking Finance, PIB, IBEF<br>
+  <span style="color:var(--accent)">❤️ Like stories to teach this brief what you care about</span>
+</div>
+
+<script>
+// ── Preferences ──
+const PK = 'dfb_tags_v1', CK = 'dfb_cards_v1';
+let likedTags = JSON.parse(localStorage.getItem(PK)||'{}');
+let likedCards = JSON.parse(localStorage.getItem(CK)||'[]');
+
+function like(id, tags, btn){
+  const idx = likedCards.indexOf(id);
+  if(idx > -1){
+    likedCards.splice(idx,1);
+    tags.forEach(t=>{if(likedTags[t]){likedTags[t]--;if(likedTags[t]<=0)delete likedTags[t];}});
+    btn.innerHTML='♡ Like'; btn.classList.remove('liked');
+  } else {
+    likedCards.push(id);
+    tags.forEach(t=>{ likedTags[t]=(likedTags[t]||0)+1; });
+    btn.innerHTML='❤️ Liked'; btn.classList.add('liked');
+  }
+  localStorage.setItem(PK,JSON.stringify(likedTags));
+  localStorage.setItem(CK,JSON.stringify(likedCards));
+  updatePbar(); markPersonalized();
+}
+
+function updatePbar(){
+  const bar=document.getElementById('pbar'), tEl=document.getElementById('itags');
+  const top=Object.entries(likedTags).sort((a,b)=>b[1]-a[1]).slice(0,6).map(e=>e[0]);
+  if(top.length){ bar.style.display='flex'; tEl.innerHTML=top.map(t=>`<span class="itag">${t}</span>`).join(''); }
+  else { bar.style.display='none'; }
+}
+
+function clearPrefs(){
+  likedTags={}; likedCards=[];
+  localStorage.removeItem(PK); localStorage.removeItem(CK);
+  document.querySelectorAll('.lbtn').forEach(b=>{b.innerHTML='♡ Like';b.classList.remove('liked');});
+  document.querySelectorAll('.card.pi').forEach(c=>c.classList.remove('pi'));
+  updatePbar();
+}
+
+function markPersonalized(){
+  document.querySelectorAll('.card').forEach(card=>{
+    const tags=Array.from(card.querySelectorAll('.tag')).map(t=>t.textContent);
+    const score=tags.reduce((s,t)=>s+(likedTags[t]||0),0);
+    if(score>0) card.classList.add('pi'); else card.classList.remove('pi');
+  });
+}
+
+function restoreState(){
+  likedCards.forEach(id=>{
+    const card=document.getElementById('card-'+id);
+    if(card){const btn=card.querySelector('.lbtn');if(btn){btn.innerHTML='❤️ Liked';btn.classList.add('liked');}}
+  });
+  updatePbar(); markPersonalized();
+}
+
+// ── Navigation ──
+function showSec(id, el){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('sec-'+id).classList.add('on');
+  el.classList.add('on');
+  window.scrollTo(0,0);
+}
+
+function showSub(id, el){
+  document.querySelectorAll('.ssec').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.stab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('sub-'+id).classList.add('on');
+  el.classList.add('on');
+}
+
+// ── Date ──
+document.getElementById('hdr-date').textContent=new Date().toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+restoreState();
+</script>
+</body>
+</html>
