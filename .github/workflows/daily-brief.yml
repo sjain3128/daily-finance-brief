@@ -1,0 +1,37 @@
+name: Daily Finance Brief
+
+on:
+  schedule:
+    - cron: '30 3 * * *'
+  workflow_dispatch:
+
+jobs:
+  generate-brief:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python dependencies
+        run: pip install anthropic feedparser requests
+
+      - name: Generate Daily Finance Brief
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python generate_brief.py
+
+      - name: Commit and push updated brief
+        run: |
+          git config --global user.email "dailyfinancebrief@github.com"
+          git config --global user.name "Daily Finance Brief Bot"
+          git add index.html
+          git diff --staged --quiet || git commit -m "Daily Finance Brief $(date -u +'%Y-%m-%d')"
+          git push
